@@ -44,7 +44,7 @@ integration-tests: ## Run go test with integration flags
 .PHONY: build
 build:  ## Build application and places the binary under ./result/bin
 	@echo $(VERSION) > VERSION
-	./build/nix.sh build --print-build-logs
+	./build/nix.sh build --print-build-logs --extra-experimental-features flakes --extra-experimental-features nix-command
 
 
 .PHONY: build-docker-image

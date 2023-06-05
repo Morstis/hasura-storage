@@ -17,7 +17,7 @@ if [[ $NIX_BUILD_NATIVE -eq 1 ]]; then
 fi
 
 if [[ ( $? -eq 0 ) && ( `uname` == "Linux" ) ]]; then
-    nix build .\#dockerImage --print-build-logs && docker load < result
+    nix build --extra-experimental-features flakes --extra-experimental-features nix-command .\#dockerImage --print-build-logs && docker load < result
     exit $?
 fi
 

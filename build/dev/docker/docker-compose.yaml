@@ -1,4 +1,4 @@
-version: '2.4'
+version: "2.4"
 services:
   postgres:
     container_name: hasura-storage-postgres
@@ -7,7 +7,7 @@ services:
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d:ro
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hejsan}
 
@@ -19,7 +19,7 @@ services:
       - minio
     restart: unless-stopped
     ports:
-      - '8080:8080'
+      - "8080:8080"
     environment:
       HASURA_GRAPHQL_DATABASE_URL: ${HASURA_GRAPHQL_DATABASE_URL:-postgres://postgres:hejsan@postgres:5432/postgres}
       HASURA_GRAPHQL_ENABLE_CONSOLE: ${HASURA_GRAPHQL_ENABLE_CONSOLE:-true}
@@ -39,8 +39,8 @@ services:
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-9e1c40c65a615a5b52f52aeeaf549944ec53acb1dff4a0bf01fb58e969f915c8}
     command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:32765 /tmp
     ports:
-      - '9000:9000'
-      - '32765:32765'
+      - "9000:9000"
+      - "32765:32765"
 
   storage:
     container_name: hasura-storage-storage
@@ -49,7 +49,7 @@ services:
       - graphql-engine
     restart: unless-stopped
     ports:
-      - '8000:8000'
+      - "8001:8000"
     environment:
       DEBUG: "true"
       HASURA_METADATA: 1

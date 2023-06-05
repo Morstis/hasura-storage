@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS storage.files (
   size int,
   mime_type text,
   etag text,
+  blurhash text,
   is_uploaded boolean DEFAULT FALSE,
   uploaded_by_user_id uuid
 );
