@@ -11,6 +11,8 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/buckket/go-blurhash"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
@@ -86,6 +88,9 @@ func (ctrl *Controller) upload(
 		}
 
 		fileContent, contentType, err := ctrl.getMultipartFile(file)
+		if err != nil {
+			return filesMetadata, err
+		}
 
 		img, _, e := image.Decode(fileContent)
 		if e != nil {
@@ -96,9 +101,6 @@ func (ctrl *Controller) upload(
 			return filesMetadata, InternalServerError(fmt.Errorf("problem generating Blurhash for file %s: %w", file.Name, e))
 		}
 
-		if err != nil {
-			return filesMetadata, err
-		}
 		defer fileContent.Close()
 
 		apiErr := ctrl.metadataStorage.InitializeFile(

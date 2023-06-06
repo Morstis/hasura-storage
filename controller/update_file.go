@@ -3,8 +3,14 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"net/http"
 
+	_ "golang.org/x/image/webp"
+
+	"github.com/buckket/go-blurhash"
 	"github.com/gin-gonic/gin"
 )
 
@@ -93,6 +99,16 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 	if err != nil {
 		return FileMetadata{}, err
 	}
+
+	img, _, e := image.Decode(fileContent)
+	if e != nil {
+		return FileMetadata{}, InternalServerError(fmt.Errorf("problem converting to image.Image %s: %w", file.Name, e))
+	}
+	blurhash, e := blurhash.Encode(4, 3, img)
+	if e != nil {
+		return FileMetadata{}, InternalServerError(fmt.Errorf("problem generating Blurhash for file %s: %w", file.Name, e))
+	}
+
 	defer fileContent.Close()
 
 	etag, apiErr := ctrl.contentStorage.PutFile(fileContent, file.ID, contentType)
@@ -105,7 +121,7 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 
 	newMetadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType, "",
+		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType, blurhash,
 		ctx.Request.Header,
 	)
 	if apiErr != nil {
