@@ -1,18 +1,21 @@
 #include <stdlib.h>
 
-typedef enum types {
+typedef enum types
+{
   UNKNOWN = 0,
   JPEG,
   WEBP,
   PNG,
 } ImageType;
 
-typedef struct Result {
+typedef struct Result
+{
   void *buf;
   size_t len;
 } Result;
 
-typedef struct Options {
+typedef struct Options
+{
   int width;
   int height;
   int crop;
@@ -23,3 +26,5 @@ typedef struct Options {
 } Options;
 
 int manipulate(void *buf, size_t len, Result *result, Options options);
+
+int saveWebp(void *buf, size_t len, Result *result);

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -104,6 +105,10 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 	b := ""
 	switch contentType {
 	case "image/webp", "image/png", "image/jpeg":
+
+		buf := &bytes.Buffer{}
+		ctrl.imageTransformer.SaveAsWebp(fileContent, uint64(file.header.Size), buf)
+		fileContent = NewP(buf.Bytes())
 
 		img, _, e := image.Decode(fileContent)
 		if e != nil {

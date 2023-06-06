@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -97,15 +98,20 @@ func (ctrl *Controller) upload(
 		b := ""
 		switch contentType {
 		case "image/webp", "image/png", "image/jpeg":
+			buf := &bytes.Buffer{}
+			ctrl.imageTransformer.SaveAsWebp(fileContent, uint64(file.header.Size), buf)
+			fileContent = NewP(buf.Bytes())
 
 			img, _, e := image.Decode(fileContent)
 			if e != nil {
 				return filesMetadata, InternalServerError(fmt.Errorf("problem converting to image.Image %s: %w", file.Name, e))
 			}
+
 			b, e = blurhash.Encode(4, 3, img)
 			if e != nil {
 				return filesMetadata, InternalServerError(fmt.Errorf("problem generating Blurhash for file %s: %w", file.Name, e))
 			}
+			contentType = "image/webp"
 		}
 
 		apiErr := ctrl.metadataStorage.InitializeFile(

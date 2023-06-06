@@ -118,6 +118,62 @@ func (t *Transformer) Run(orig io.Reader, length uint64, modified io.Writer, opt
 	return nil
 }
 
+func (t *Transformer) SaveAsWebp(orig io.Reader, length uint64, modified io.Writer) error {
+	// this is to avoid processing too many images at the same time in order to save memory
+	<-t.workers
+	defer func() { t.workers <- struct{}{} }()
+
+	buf, _ := t.pool.Get().(*bytes.Buffer)
+	defer t.pool.Put(buf)
+	defer buf.Reset()
+
+	if length > math.MaxUint32 {
+		panic("length is too big")
+	}
+	if l := int(length); buf.Len() < l {
+		buf.Grow(l)
+	}
+
+	_, err := io.Copy(buf, orig)
+	if err != nil {
+		panic(err)
+	}
+
+	b, err := SaveAsWebp(buf.Bytes())
+	if err != nil {
+		return fmt.Errorf("problem converting image to webp: %w", err)
+	}
+
+	if _, err := modified.Write(b); err != nil {
+		return fmt.Errorf("problem writing image as webp: %w", err)
+	}
+
+	return nil
+}
+
+func SaveAsWebp(buf []byte) ([]byte, error) {
+	var result C.Result
+
+	err := C.saveWebp(
+		unsafe.Pointer(&buf[0]),
+		C.size_t(len(buf)),
+		&result, //nolint: exhaustruct
+	)
+	if err != 0 {
+		s := C.GoString(C.vips_error_buffer())
+		C.vips_error_clear()
+
+		return nil, fmt.Errorf("%v\nStack:\n%s", s, debug.Stack()) //nolint: goerr113
+	}
+	var data []byte
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sh.Data = uintptr(result.buf)
+	sh.Len = int(result.len)
+	sh.Cap = int(result.len)
+
+	return data, nil
+}
+
 func Manipulate(buf []byte, opts Options) ([]byte, error) {
 	var result C.Result
 
