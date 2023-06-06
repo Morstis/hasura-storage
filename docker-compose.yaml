@@ -1,0 +1,97 @@
+version: "2.4"
+services:
+  postgres:
+    container_name: hasura-storage-postgres
+    image: postgres:13
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d:ro
+    expose:
+      - ${POSTGRES_PORT}
+    env_file:
+      - docker.env/postgres.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  graphql-engine:
+    image: hasura/graphql-engine:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${GRAPHQL_PORT}:8080"
+    env_file:
+      - docker.env/postgres.env
+      - docker.env/graphql.env
+    healthcheck:
+      test: timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1
+      interval: 2s
+      timeout: 1s
+      retries: 10
+
+  storage:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      graphql-engine:
+        condition: service_healthy
+      s3:
+        condition: service_started
+    command: serve
+    ports:
+      - "${STORAGE_PORT}:8000"
+    expose:
+      - "${STORAGE_PORT}"
+    env_file:
+      - docker.env/postgres.env
+      - docker.env/graphql.env
+      - docker.env/storage.env
+
+  # bucket master controller
+  master:
+    image: chrislusf/seaweedfs
+    expose:
+      - 9333
+      - 19333
+      - 9324
+    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324"
+
+  # first bucket volume
+  volume:
+    image: chrislusf/seaweedfs
+    expose:
+      - 8081
+      - 18080
+      - 9325
+    command: 'volume -mserver="master:9333" -ip.bind=0.0.0.0 -port=8081  -metricsPort=9325'
+    depends_on:
+      - master
+
+  # optional bucket filer is used
+  filer:
+    image: chrislusf/seaweedfs
+    expose:
+      - 8888
+      - 18888
+      - 9326
+    command: 'filer -master="master:9333" -ip.bind=0.0.0.0 -metricsPort=9326'
+    tty: true
+    stdin_open: true
+    depends_on:
+      - master
+      - volume
+
+  # s3 access TODO: add secutity
+  s3:
+    image: chrislusf/seaweedfs
+    expose:
+      - 8333
+      - 9327
+    command: 's3 -filer="filer:8888" -ip.bind=0.0.0.0 -metricsPort=9327'
+    depends_on:
+      - master
+      - volume
+      - filer
