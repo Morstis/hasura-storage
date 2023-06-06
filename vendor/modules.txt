@@ -51,6 +51,10 @@ github.com/aws/aws-sdk-go/service/sso
 github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
+# github.com/buckket/go-blurhash v1.1.0
+## explicit; go 1.14
+github.com/buckket/go-blurhash
+github.com/buckket/go-blurhash/base83
 # github.com/containerd/containerd v1.6.13
 ## explicit; go 1.17
 # github.com/fsnotify/fsnotify v1.6.0

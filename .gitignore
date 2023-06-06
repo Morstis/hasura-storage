@@ -5,3 +5,5 @@ result
 go.work
 go.work.sum
 .ccls-cache
+
+./vendor
