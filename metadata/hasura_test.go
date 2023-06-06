@@ -238,7 +238,7 @@ func TestPopulateMetadata(t *testing.T) {
 			t.Parallel()
 			tc := tc
 
-			got, err := hasura.PopulateMetadata(context.Background(), tc.fileID, "name", 123, "default", "asdasd", true, "text", tc.headers)
+			got, err := hasura.PopulateMetadata(context.Background(), tc.fileID, "name", 123, "default", "asdasd", true, "text", "blurhash", tc.headers)
 
 			if tc.expectedStatusCode != err.StatusCode() {
 				t.Errorf("wrong status code, expected %d, got %d", tc.expectedStatusCode, err.StatusCode())
@@ -269,7 +269,7 @@ func TestGetFileByID(t *testing.T) {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", "blurhash", getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -441,7 +441,7 @@ func TestDeleteFileByID(t *testing.T) {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", "blurhash", getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -515,7 +515,7 @@ func TestListFiles(t *testing.T) {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID1, "name", 123, "default", "asdasd", true, "text", getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID1, "name", 123, "default", "asdasd", true, "text", "blurhash", getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -524,7 +524,7 @@ func TestListFiles(t *testing.T) {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID2, "asdads", 123, "default", "asdasd", true, "text", getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID2, "asdads", 123, "default", "asdasd", true, "text", "blurhash", getAuthHeader()); err != nil {
 		panic(err)
 	}
 

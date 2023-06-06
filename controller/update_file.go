@@ -105,7 +105,7 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 
 	newMetadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType,
+		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType, "",
 		ctx.Request.Header,
 	)
 	if apiErr != nil {

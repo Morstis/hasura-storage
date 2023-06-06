@@ -60,7 +60,7 @@ type MetadataStorage interface {
 	) *APIError
 	PopulateMetadata(
 		ctx context.Context,
-		id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string,
+		id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string, blurhash string,
 		headers http.Header) (FileMetadata, *APIError,
 	)
 	SetIsUploaded(ctx context.Context, fileID string, isUploaded bool, headers http.Header) *APIError

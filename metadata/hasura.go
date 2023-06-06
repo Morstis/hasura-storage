@@ -210,11 +210,11 @@ func (h *Hasura) InitializeFile(
 
 func (h *Hasura) PopulateMetadata(
 	ctx context.Context,
-	fileID, name string, size int64, bucketID, etag string, isUploaded bool, mimeType string,
+	fileID, name string, size int64, bucketID, etag string, isUploaded bool, mimeType string, blurhash string,
 	headers http.Header,
 ) (controller.FileMetadata, *controller.APIError) {
 	var query struct {
-		UpdateStorageFile FileMetadata `graphql:"updateFile(pk_columns: {id: $id}, _set: {bucketId: $bucketId, etag: $etag, isUploaded: $isUploaded, mimeType: $mimeType, name: $name, size: $size})"` //nolint
+		UpdateStorageFile FileMetadata `graphql:"updateFile(pk_columns: {id: $id}, _set: {bucketId: $bucketId, etag: $etag, isUploaded: $isUploaded, mimeType: $mimeType, name: $name, size: $size, blurhash: $blurhash})"` //nolint
 	}
 
 	variables := map[string]interface{}{
@@ -224,6 +224,7 @@ func (h *Hasura) PopulateMetadata(
 		"isUploaded": graphql.Boolean(isUploaded),
 		"mimeType":   graphql.String(mimeType),
 		"name":       graphql.String(name),
+		"blurhash":   graphql.String(blurhash),
 		"size":       graphql.Int(size),
 	}
 

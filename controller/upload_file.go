@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"mime/multipart"
 	"net/http"
 
+	"github.com/buckket/go-blurhash"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -82,6 +86,16 @@ func (ctrl *Controller) upload(
 		}
 
 		fileContent, contentType, err := ctrl.getMultipartFile(file)
+
+		img, _, e := image.Decode(fileContent)
+		if e != nil {
+			return filesMetadata, InternalServerError(fmt.Errorf("problem converting to image.Image %s: %w", file.Name, e))
+		}
+		blurhash, e := blurhash.Encode(4, 3, img)
+		if e != nil {
+			return filesMetadata, InternalServerError(fmt.Errorf("problem generating Blurhash for file %s: %w", file.Name, e))
+		}
+
 		if err != nil {
 			return filesMetadata, err
 		}
@@ -107,7 +121,7 @@ func (ctrl *Controller) upload(
 
 		metadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 			ctx,
-			file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType,
+			file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, blurhash,
 			http.Header{"x-hasura-admin-secret": []string{ctrl.hasuraAdminSecret}},
 		)
 		if apiErr != nil {

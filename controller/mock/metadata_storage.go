@@ -110,9 +110,9 @@ func (mr *MockMetadataStorageMockRecorder) ListFiles(arg0, arg1 interface{}) *go
 }
 
 // PopulateMetadata mocks base method.
-func (m *MockMetadataStorage) PopulateMetadata(arg0 context.Context, arg1, arg2 string, arg3 int64, arg4, arg5 string, arg6 bool, arg7 string, arg8 http.Header) (controller.FileMetadata, *controller.APIError) {
+func (m *MockMetadataStorage) PopulateMetadata(arg0 context.Context, arg1, arg2 string, arg3 int64, arg4, arg5 string, arg6 bool, arg7 string, arg8 string, arg9 http.Header) (controller.FileMetadata, *controller.APIError) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PopulateMetadata", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+	ret := m.ctrl.Call(m, "PopulateMetadata", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 	ret0, _ := ret[0].(controller.FileMetadata)
 	ret1, _ := ret[1].(*controller.APIError)
 	return ret0, ret1
