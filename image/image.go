@@ -152,6 +152,7 @@ func (t *Transformer) SaveAsWebp(orig io.Reader, length uint64, modified io.Writ
 }
 
 func SaveAsWebp(buf []byte) ([]byte, error) {
+
 	var result C.Result
 
 	err := C.saveWebp(

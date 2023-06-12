@@ -5,6 +5,8 @@ services:
     image: postgres:13
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d:ro
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     expose:
       - ${POSTGRES_PORT}
     env_file:

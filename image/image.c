@@ -16,8 +16,6 @@ int saveWebp(void *buf, size_t len, Result *result)
   VipsImage *orig = vips_image_new_from_buffer(buf, len, "", "access",
                                                VIPS_ACCESS_SEQUENTIAL, NULL);
 
-  VipsImage *out;
-
   int err = vips_webpsave_buffer(orig, &result->buf, &result->len, NULL);
   g_object_unref(orig);
 

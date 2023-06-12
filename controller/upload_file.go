@@ -65,6 +65,11 @@ func (ctrl *Controller) getMultipartFile(file fileData) (multipart.File, string,
 			InternalServerError(fmt.Errorf("problem figuring out content type for file %s: %w", file.Name, err))
 	}
 
+	file.header.Header.Add("Content-Type", mt.String())
+	fileContent, err = file.header.Open()
+	if err != nil {
+		return nil, "", InternalServerError(fmt.Errorf("problem opening file %s: %w", file.Name, err))
+	}
 	return fileContent, mt.String(), nil
 }
 
@@ -95,7 +100,8 @@ func (ctrl *Controller) upload(
 
 		defer fileContent.Close()
 
-		b := ""
+		fileSize := file.header.Size
+		hash := ""
 		switch contentType {
 		case "image/webp", "image/png", "image/jpeg":
 			buf := &bytes.Buffer{}
@@ -106,8 +112,9 @@ func (ctrl *Controller) upload(
 			if e != nil {
 				return filesMetadata, InternalServerError(fmt.Errorf("problem converting to image.Image %s: %w", file.Name, e))
 			}
+			fileSize = int64(buf.Len())
 
-			b, e = blurhash.Encode(4, 3, img)
+			hash, e = blurhash.Encode(4, 3, img)
 			if e != nil {
 				return filesMetadata, InternalServerError(fmt.Errorf("problem generating Blurhash for file %s: %w", file.Name, e))
 			}
@@ -116,7 +123,7 @@ func (ctrl *Controller) upload(
 
 		apiErr := ctrl.metadataStorage.InitializeFile(
 			ctx,
-			file.ID, file.Name, file.header.Size, bucket.ID, contentType,
+			file.ID, file.Name, fileSize, bucket.ID, contentType,
 			request.headers)
 		if apiErr != nil {
 			return filesMetadata, apiErr
@@ -134,7 +141,7 @@ func (ctrl *Controller) upload(
 
 		metadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 			ctx,
-			file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, b,
+			file.ID, file.Name, fileSize, bucket.ID, etag, true, contentType, hash,
 			http.Header{"x-hasura-admin-secret": []string{ctrl.hasuraAdminSecret}},
 		)
 		if apiErr != nil {
